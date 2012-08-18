@@ -1,0 +1,136 @@
+// Place all the styles related to the home controller here.
+// They will automatically be included in application.css.
+// You can use Sass (SCSS) here: http://sass-lang.com/
+
+body {
+	width: 900px;
+	margin: 0px auto 50px auto;
+	font-family: "Lucida Sans", "Verdana", sans-serif;
+}
+
+#description {
+	line-height: 1.8em;
+}
+
+#standings h3 {
+	font-size: 2em;
+	margin-top: 0px;
+	margin-bottom: 10px;
+}
+
+#standings li .rank {
+	float: left;
+	font-size: 4em;
+	font-family: "Georgia", serif;
+	color: #AAAAAA;
+	width: 60px;
+	text-align: right;
+}
+
+li {
+	overflow: auto;
+	margin-bottom: 10px;
+}
+
+.column .box li {
+	margin-bottom: 30px;
+}
+
+.gray {
+	margin-left: 70px;
+	background-color: #F3F3F3;
+	padding: 10px;
+}
+
+.score {
+	color: #333333;
+	font-size: 1.5em;
+	font-weight: normal;
+}
+
+.number {
+	float: left;
+	font-size: 3em;
+	margin-left: 5px;
+	margin-right: 15px;
+	padding-bottom: 20px;
+}
+
+.negative {
+	color: red;
+	font-weight: bold;
+}
+
+.positive {
+	color: green;
+	font-weight: bold;
+}
+
+.small {
+	font-size: .8em;
+	color: #555555;
+}
+
+a {
+	color: #FF6E00;
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+p.bodytext {
+	margin-top: 0px;
+}
+
+.bodytext {
+	font-size: .8em;
+}
+
+h1 {
+	text-align: center;
+}
+
+h2 {
+	margin-top: 50px;
+	text-transform: uppercase;
+	color: #333333;
+	border-bottom: 1px dotted #333333;
+}
+
+.big {
+	font-size: 2em;
+}
+
+ol {
+	padding-left: 0px;
+	list-style-type: none;
+}
+
+.box {
+	background-color: #F3F3F3;
+	padding: 10px;
+	margin-bottom: 10px;
+	overflow: auto;
+}
+
+.box h3 {
+	margin-bottom: 0px;
+}
+
+#stats {
+	overflow: auto;
+}
+
+.column {
+	width: 46%;
+}
+
+.left {
+	float: left;
+}
+
+.right {
+	float: right;
+}

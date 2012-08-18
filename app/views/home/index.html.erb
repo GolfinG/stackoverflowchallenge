@@ -1,0 +1,322 @@
+<h1>Home#index</h1>
+This is my new homepage bitchez!
+
+
+<?php
+/**
+ * Call with ?getCurrentReputations=true to get current reputations
+ */
+$API_URL = "http://api.stackoverflow.com/1.1/users/";
+$CONTESTANTS = array("955404" => 1,  // Golf
+                     "959577" => 1,  // Beard James
+                     "379289" => 1,  // Tim
+                     "781529" => 28,  // Min Sul
+                     "906800" => 11,  // Ji
+					 "303052" => 197); // Perl James
+$FROM_DATE = 1317193260; // Timestamp on September 28
+
+/**
+ * Return a JSON object from Stack Overflow API
+ * method string name of API method to call
+ * options array of options
+ */
+function addApiCall($method, $options = null) {
+	global $API_URL, $CONTESTANTS, $mh;
+
+	if ($options) {
+		// Use & as delimiter instead of &amp;
+		$options = http_build_query($options, '', '&');
+	}
+
+	$contestantString = implode(";", array_keys($CONTESTANTS));
+	$ch = curl_init($API_URL . "$contestantString/$method?$options");
+	curl_setopt($ch, CURLOPT_ENCODING, "gzip");
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	curl_multi_add_handle($mh, $ch);
+
+	return $ch;
+}
+
+/**
+ * Take an array of users, subtract initial reputation,
+ * sort the array to get who is in the lead,
+ * and set the key to be the user_id
+ */
+function formatUsers($users) {
+	global $CONTESTANTS, $FROM_DATE;
+
+	// Subtract initial reputation
+	// Use basic for loop to pass by reference
+	for ($i = 0; $i < count($users); $i++) {
+	    if (time() - $FROM_DATE > 0) {
+		    $users[$i]->reputation -= $CONTESTANTS[$users[$i]->user_id];
+		}
+		else {
+		    $users[$i]->reputation = 0;
+		}
+	}
+
+	// Sort new list by comparing reputation
+	function compareReputation($a, $b) {
+		return $b->reputation - $a->reputation;
+	}
+	usort($users, "compareReputation");
+
+	$newUsers = array();
+	foreach ($users as $user) {
+		$newUsers[$user->user_id] = $user;
+	}
+	return $newUsers;
+}
+
+if ($_GET["getCurrentReputations"]) {
+	$users = apiCall("")->users;
+	foreach ($users as $user) {
+		$name = $user->display_name;
+		$reputation = $user->reputation;
+		echo "$name - $reputation <br />";
+	}
+	return;
+}
+
+/**
+ * Take a Stack Overflow timestamp which is in GMT,
+ * convert it to PST, and output it as a nice displayable string
+ * timestamp the timestamp to format
+ * showTime whether or not to show exact time in the result
+ */
+function formatDate($timestamp, $showTime = true) {
+	return $showTime ? date("F j g:ia", $timestamp) :
+					   date("M d Y", $timestamp);
+	/*
+    return $showTime ? date("F j g:ia", $timestamp + 7 * 60 * 60) :
+        			   date("M d Y", $timestamp + 7 * 60 * 60);
+    */
+    }
+
+/**
+ * Take a block of HTML, remove tags, and limit length to $MAX_LENGTH chars
+ */
+function formatAnswerBody($answer) {
+	$MAX_LENGTH = 150;
+	$answer = strip_tags($answer);
+	if (strlen($answer) > $MAX_LENGTH) {
+		$answer = substr($answer, 0, $MAX_LENGTH) . "...";
+	}
+	return $answer;
+}
+
+$mh = curl_multi_init();
+
+$users = addApiCall("");
+$recentReputationChanges = addApiCall("reputation", array("pagesize" => 10, "fromdate" => $FROM_DATE));
+$top3Questions = addApiCall("questions", array("pagesize" => 3, "sort" => "votes", "fromdate" => $FROM_DATE));
+$worstQuestion = addApiCall("questions", array("body" => "true", "pagesize" => 1, "sort" => "votes", "fromdate" => $FROM_DATE, "order" => "asc"));
+$top3Answers = addApiCall("answers", array("body" => "true", "pagesize" => 3, "sort" => "votes", "fromdate" => $FROM_DATE));
+$worstAnswer = addApiCall("answers", array("body" => "true", "pagesize" => 1, "sort" => "votes", "fromdate" => $FROM_DATE, "order" => "asc"));
+
+// Execute curls in parallel
+$running = 0;
+do {
+	curl_multi_exec($mh, $running);
+} while ($running > 0);
+
+$users = formatUsers(json_decode(curl_multi_getcontent($users))->users);
+$recentReputationChanges = json_decode(curl_multi_getcontent($recentReputationChanges))->rep_changes;
+$top3Questions = json_decode(curl_multi_getcontent($top3Questions))->questions;
+$worstQuestion = json_decode(curl_multi_getcontent($worstQuestion))->questions[0];
+$top3Answers = json_decode(curl_multi_getcontent($top3Answers))->answers;
+$worstAnswer = json_decode(curl_multi_getcontent($worstAnswer))->answers[0];
+
+curl_multi_close($mh);
+
+
+// Calculate days remaining until end date
+$datetime1 = new DateTime();
+$datetime2 = new DateTime('2011-10-29');
+$daysLeft = $datetime1->diff($datetime2);
+
+?>
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>022 Stack Overflow Challenge</title>
+<link rel="shortcut icon" href="/favicon.ico" />
+<link rel="stylesheet" type="text/css" href="index.css"></style>
+<link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.0/themes/ui-lightness/jquery-ui.css"></style>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+<script>
+window.onload = function() {
+	$(function() {
+		$( "#progressbar" ).progressbar({
+			value: (30 - <?php echo $daysLeft->format('%d') ?>) / 30 * 100
+		});
+	});
+}
+</script>
+</head>
+<body>
+<h1><img src="022stackoverflowchallenge.png" alt="022 Stack Overflow Challenge" /></h1>
+
+<div id="description">
+	<p>Welcome to the <strong>022 Stack Overflow Challenge</strong>! The rules are simple, the 022er with the most <strong>Stack Overflow Reputation</strong> in <strong>30 days</strong> wins! <a href="http://stackoverflow.com/faq#reputation" target="_blank">See how to earn Stack Overflow Reputation.</a></p>
+
+	<p>To participate, create an account on Stack Overflow if you don't have one, and e-mail your Stack Overflow userid (the numbers in the URL on your profile page, mine is 955404) to golf.sinteppadon@gmail.com</p>
+</div>
+
+<?php if ($daysLeft->format('%m') == 0) { ?>
+	<h3 style="clear: both">Competition ends at 12:01am!</h3>
+
+<div id="progressbar"></div>
+
+<p>Sep 28<span style="float: right">Oct 28</span></p>
+
+<h2 class="big">Standings</h2>
+<ol id="standings">
+<?php
+function getFirstElement($array) {
+	return $array[0];
+}
+$currentReputation = $users[getFirstElement(array_keys($users))]->reputation + 1;
+$currentRank = $currentIndex = 0;
+
+foreach ($users as $user) {
+	$currentIndex++;
+	if ($user->reputation < $currentReputation) {
+		$currentReputation = $user->reputation;
+		$currentRank = $currentIndex;
+	}
+?>
+	<li>
+	<div class="rank"><?php echo $currentRank ?>.</div>
+	<div class="gray">
+	<h3><a href="http://stackoverflow.com/users/<?php echo $user->user_id ?>"><?php echo $user->display_name ?></a> <span class="score right" title="reputation score"><?php echo $user->reputation ?></span></h3>
+	<span class="small">Last seen on Stack Overflow: <?php echo formatDate($user->last_access_date, false) ?></span>
+	</div>
+	</li>
+<?php } ?>
+</ol>
+
+<h2>Latest reputation changes</h2>
+<div class="box">
+
+<?php if (empty($recentReputationChanges)) { ?>
+	No reputation score changes yet!
+<?php } ?>
+<ol>
+<?php foreach ($recentReputationChanges as $change) {
+	$user_id = $change->user_id;
+	$repChange = $change->positive_rep - $change->negative_rep;
+?>
+	<li>
+		<?php
+			echo (($repChange > 0) ? "<span class='positive'>+$repChange</span>" : "<span class='negative'>$repChange</span>");
+		?>
+		<strong><a href="http://stackoverflow.com/users/<?php echo $users[$user_id]->user_id ?>"><?php echo $users[$user_id]->display_name ?></a>
+		<?php echo $change->post_type == "answer" ? "a:" : "q:" ?></strong> <a class="bodytext"href="http://stackoverflow.com/questions/<?php echo $change->post_id ?>"><?php echo $change->title ?></a>
+
+		<span class="small"><?php echo formatDate($change->on_date) ?></span>
+
+	</li>
+<?php } ?>
+</ol>
+
+</div>
+
+<div class="column left">
+
+	<h2>Top Questions</h2>
+	<div class="box">
+
+	<?php if (empty($top3Questions)) { ?>
+		No questions yet!
+	<?php } ?>
+	<ol>
+	<?php foreach ($top3Questions as $question) { ?>
+		<li>
+			<div class="score number"><?php echo $question->score ?></div>
+			<p class="bodytext"><a href="http://stackoverflow.com/questions/<?php echo $question->question_id ?>">
+				<?php echo $question->title ?>
+			</a></p>
+			<strong class="left">- <a href="http://stackoverflow.com/users/<?php echo $question->owner->user_id ?>"><?php echo $question->owner->display_name; ?></a></strong>
+			<span class="small right" style="text-align: right;"><?php echo formatDate($question->creation_date) ?><br /><?php echo implode(", ", $question->tags); ?></span>
+		</li>
+	<?php } ?>
+	</ol>
+	</div>
+
+	<h2>Worst Question</h2>
+	<div class="box">
+
+	<?php if ($worstQuestion->score >= 0) { ?>
+		No questions currently have negative votes
+	<?php } else { ?>
+		<div class="score number"><?php echo $worstQuestion->score ?></div>
+		<p class="bodytext"><a href="http://stackoverflow.com/questions/<?php echo $worstQuestion->question_id ?> ?>">
+			<?php echo $worstQuestion->title ?>
+		</a></p>
+			<strong class="left">- <a href="http://stackoverflow.com/users/<?php echo $worstQuestion->owner->user_id ?>"><?php echo $worstQuestion->owner->display_name; ?></a></strong>
+		<span class="small right" style="text-align: right;"><?php echo formatDate($worstQuestion->creation_date) ?><br /><?php echo implode(", ", $worstQuestion->tags); ?></span>
+	<?php } ?>
+	</div>
+
+</div>
+
+<div class="column right">
+
+	<h2>Top Answers</h2>
+	<div class="box">
+
+	<?php if (empty($top3Answers)) { ?>
+		No answers yet!
+	<?php } ?>
+	<ol>
+	<?php foreach ($top3Answers as $answer) { ?>
+		<li>
+			<div class="score number"><?php echo $answer->score ?></div>
+			<p class="bodytext"><a href="http://stackoverflow.com/questions/<?php echo $answer->question_id ?>#<?php echo $answer->answer_id ?>">
+				<?php echo formatAnswerBody($answer->body) ?>
+			</a></p>
+				<strong class="left">- <a href="http://stackoverflow.com/users/<?php echo $answer->owner->user_id ?>"><?php echo $answer->owner->display_name; ?></a></strong>
+			<span class="small right"><?php echo formatDate($answer->creation_date) ?></span>
+		</li>
+	<?php } ?>
+	</ol>
+	</div>
+
+	<h2>Worst Answer</h2>
+	<div class="box">
+
+	<?php if ($worstAnswer->score >= 0) { ?>
+		No answers currently have negative votes
+	<?php } else { ?>
+		<div class="score number"><?php echo $worstAnswer->score ?></div>
+		<p class="bodytext"><a href="http://stackoverflow.com/questions/<?php echo $worstAnswer->question_id ?>#<?php echo $worstAnswer->answer_id ?>">
+			<?php echo formatAnswerBody($worstAnswer->body) ?>
+		</a></p>
+			<strong class="left">- <a href="http://stackoverflow.com/users/<?php echo $worstAnswer->owner->user_id ?>"><?php echo $worstAnswer->owner->display_name; ?></a></strong>
+		<span class="small right"><?php echo formatDate($worstAnswer->creation_date) ?></span>
+	<?php } ?>
+	</div>
+
+</div>
+
+<?php } ?>
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-25893301-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+</body>
+</html>
