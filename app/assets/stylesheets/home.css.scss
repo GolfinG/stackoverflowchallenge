@@ -12,13 +12,18 @@ body {
 	line-height: 1.8em;
 }
 
-#standings h3 {
+.team {
+	width: 450px;
+	float: left;
+}
+
+.team h3 {
 	font-size: 2em;
 	margin-top: 0px;
 	margin-bottom: 10px;
 }
 
-#standings li .rank {
+.team li .rank {
 	float: left;
 	font-size: 4em;
 	font-family: "Georgia", serif;
@@ -37,11 +42,21 @@ li {
 }
 
 .gray {
-	margin-left: 70px;
 	background-color: #F3F3F3;
 	padding: 10px;
 }
 
+.seattle {
+	background-color: #F3F3FA;
+	padding: 10px;
+	margin-right: 10px;
+}
+
+.bayarea {
+	background-color: #FFF7E7;
+	padding: 10px;
+	margin-right: 10px;
+}
 .score {
 	color: #333333;
 	font-size: 1.5em;

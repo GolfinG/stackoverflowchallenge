@@ -1,10 +1,8 @@
-<h1>Home#index</h1>
-
 <script>
 window.onload = function() {
-	$(function() {
-		$("#progressbar").progressbar({
-			value: (30 - <?php echo $daysLeft->format('%d') ?>) / 30 * 100
+	(function() {
+		("#progressbar").progressbar({
+			value: <%= days_from_beginning %> / 40 * 100
 		})
 	})
 }
@@ -12,13 +10,12 @@ window.onload = function() {
 <h1><img src="022stackoverflowchallenge.png" alt="022 Stack Overflow Challenge" /></h1>
 
 <div id="description">
-	<p>Welcome to <strong>022 Stack Overflow Challenge Season 2</strong>! This season features Team Seattle vs. Team Bay Area (with some Bellevue)! The rules are simple, the team with the most <strong>Stack Overflow Reputation</strong> in <strong> days</strong> wins! <a href="http://stackoverflow.com/faq#reputation" target="_blank">See how to earn Stack Overflow Reputation.</a></p>
+	<p>Welcome to <strong>022 Stack Overflow Challenge Season 2</strong>! This season features Team Seattle vs. Team Bay Area (with some Bellevue)! The rules are simple, the team with the most <strong>Stack Overflow Reputation</strong> in <strong>6 weeks</strong> wins!</p>
 
-	<p>To participate, create an account on Stack Overflow if you don't have one, and e-mail your Stack Overflow userid (the numbers in the URL on your profile page, mine is 955404) to golf.sinteppadon@gmail.com</p>
+	<p><strong>Reputation</strong> is like Reddit upvotes, you do things on Stack Overflow and get points. Your 022 Stack Overflow Challenge score is simply any Reputation you gain after the competition start date - all competitors start at 0 points. <a href="http://stackoverflow.com/faq#reputation" target="_blank">See how to earn Stack Overflow Reputation.</a></p>
+
+	<p>It's not too late to join! Add your name to the <a href="https://docs.google.com/spreadsheet/ccc?key=0AtdiUzPLzgsidERKS0dIeGZtYlYxbHVHY0hDRWhxZkE#gid=0">Google Doc</a> and tell Golf.</p>
 </div>
-
-<?php if ($daysLeft->format('%m') == 0) { ?>
-	<h3 style="clear: both">Competition ends at 12:01am!</h3>
 
 <div id="progressbar"></div>
 
@@ -26,154 +23,12 @@ window.onload = function() {
 
 <h2 class="big">Standings</h2>
 <ol id="standings">
-<?php
-$currentReputation = $users[getFirstElement(array_keys($users))]->reputation + 1
-$currentRank = $currentIndex = 0
-
-    #users = formatUsers(json_decode(curl_multi_getcontent(users))->users)
-    #recentReputationChanges = json_decode(curl_multi_getcontent(recentReputationChanges))->rep_changes
-    #top3Questions = json_decode(curl_multi_getcontent(top3Questions))->questions
-    #worstQuestion = json_decode(curl_multi_getcontent(worstQuestion))->questions[0]
-    #top3Answers = json_decode(curl_multi_getcontent(top3Answers))->answers
-    #worstAnswer = json_decode(curl_multi_getcontent(worstAnswer))->answers[0]
-
-users.each do |user|
-	something
-end
-
-foreach ($users as $user) {
-	$currentIndex++
-	if ($user->reputation < $currentReputation) {
-		$currentReputation = $user->reputation
-		$currentRank = $currentIndex
-	}
-?>
-	<li>
-	<div class="rank"><?php echo $currentRank ?>.</div>
-	<div class="gray">
-	<h3><a href="http://stackoverflow.com/users/<?php echo $user->user_id ?>"><?php echo $user->display_name ?></a> <span class="score right" title="reputation score"><?php echo $user->reputation ?></span></h3>
-	<span class="small">Last seen on Stack Overflow: <?php echo formatDate($user->last_access_date, false) ?></span>
-	</div>
-	</li>
-<?php } ?>
-</ol>
-
-<h2>Latest reputation changes</h2>
-<div class="box">
-
-<?php if (empty($recentReputationChanges)) { ?>
-	No reputation score changes yet!
-<?php } ?>
-<ol>
-<?php foreach ($recentReputationChanges as $change) {
-	$user_id = $change->user_id
-	$repChange = $change->positive_rep - $change->negative_rep
-?>
-	<li>
-		<?php
-			echo (($repChange > 0) ? "<span class='positive'>+$repChange</span>" : "<span class='negative'>$repChange</span>")
-		?>
-		<strong><a href="http://stackoverflow.com/users/<?php echo $users[$user_id]->user_id ?>"><?php echo $users[$user_id]->display_name ?></a>
-		<?php echo $change->post_type == "answer" ? "a:" : "q:" ?></strong> <a class="bodytext"href="http://stackoverflow.com/questions/<?php echo $change->post_id ?>"><?php echo $change->title ?></a>
-
-		<span class="small"><?php echo formatDate($change->on_date) ?></span>
-
-	</li>
-<?php } ?>
-</ol>
-
-</div>
-
-<div class="column left">
-
-	<h2>Top Questions</h2>
-	<div class="box">
-
-	<?php if (empty($top3Questions)) { ?>
-		No questions yet!
-	<?php } ?>
-	<ol>
-	<?php foreach ($top3Questions as $question) { ?>
-		<li>
-			<div class="score number"><?php echo $question->score ?></div>
-			<p class="bodytext"><a href="http://stackoverflow.com/questions/<?php echo $question->question_id ?>">
-				<?php echo $question->title ?>
-			</a></p>
-			<strong class="left">- <a href="http://stackoverflow.com/users/<?php echo $question->owner->user_id ?>"><?php echo $question->owner->display_name ?></a></strong>
-			<span class="small right" style="text-align: right"><?php echo formatDate($question->creation_date) ?><br /><?php echo implode(", ", $question->tags) ?></span>
-		</li>
-	<?php } ?>
-	</ol>
-	</div>
-
-	<h2>Worst Question</h2>
-	<div class="box">
-
-	<?php if ($worstQuestion->score >= 0) { ?>
-		No questions currently have negative votes
-	<?php } else { ?>
-		<div class="score number"><?php echo $worstQuestion->score ?></div>
-		<p class="bodytext"><a href="http://stackoverflow.com/questions/<?php echo $worstQuestion->question_id ?> ?>">
-			<?php echo $worstQuestion->title ?>
-		</a></p>
-			<strong class="left">- <a href="http://stackoverflow.com/users/<?php echo $worstQuestion->owner->user_id ?>"><?php echo $worstQuestion->owner->display_name ?></a></strong>
-		<span class="small right" style="text-align: right"><?php echo formatDate($worstQuestion->creation_date) ?><br /><?php echo implode(", ", $worstQuestion->tags) ?></span>
-	<?php } ?>
-	</div>
-
-</div>
-
-<div class="column right">
-
-	<h2>Top Answers</h2>
-	<div class="box">
-
-	<?php if (empty($top3Answers)) { ?>
-		No answers yet!
-	<?php } ?>
-	<ol>
-	<?php foreach ($top3Answers as $answer) { ?>
-		<li>
-			<div class="score number"><?php echo $answer->score ?></div>
-			<p class="bodytext"><a href="http://stackoverflow.com/questions/<?php echo $answer->question_id ?>#<?php echo $answer->answer_id ?>">
-				<?php echo formatAnswerBody($answer->body) ?>
-			</a></p>
-				<strong class="left">- <a href="http://stackoverflow.com/users/<?php echo $answer->owner->user_id ?>"><?php echo $answer->owner->display_name ?></a></strong>
-			<span class="small right"><?php echo formatDate($answer->creation_date) ?></span>
-		</li>
-	<?php } ?>
-	</ol>
-	</div>
-
-	<h2>Worst Answer</h2>
-	<div class="box">
-
-	<?php if ($worstAnswer->score >= 0) { ?>
-		No answers currently have negative votes
-	<?php } else { ?>
-		<div class="score number"><?php echo $worstAnswer->score ?></div>
-		<p class="bodytext"><a href="http://stackoverflow.com/questions/<?php echo $worstAnswer->question_id ?>#<?php echo $worstAnswer->answer_id ?>">
-			<?php echo formatAnswerBody($worstAnswer->body) ?>
-		</a></p>
-			<strong class="left">- <a href="http://stackoverflow.com/users/<?php echo $worstAnswer->owner->user_id ?>"><?php echo $worstAnswer->owner->display_name ?></a></strong>
-		<span class="small right"><?php echo formatDate($worstAnswer->creation_date) ?></span>
-	<?php } ?>
-	</div>
-
-</div>
-
-<?php } ?>
-
-<script type="text/javascript">
-
-  var _gaq = _gaq || []
-  _gaq.push(['_setAccount', 'UA-25893301-1'])
-  _gaq.push(['_trackPageview'])
-
-  (function() {
-    var ga = document.createElement('script') ga.type = 'text/javascript' ga.async = true
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js'
-    var s = document.getElementsByTagName('script')[0] s.parentNode.insertBefore(ga, s)
-  })()
-
-</script>
+<%= @responses.inspect %>
+<%
+    #users = formatUsers(json_decode(curl_multi_getcontent(users)).users)
+    #recentReputationChanges = json_decode(curl_multi_getcontent(recentReputationChanges)).rep_changes
+    #top3Questions = json_decode(curl_multi_getcontent(top3Questions)).questions
+    #worstQuestion = json_decode(curl_multi_getcontent(worstQuestion)).questions[0]
+    #top3Answers = json_decode(curl_multi_getcontent(top3Answers)).answers
+    #worstAnswer = json_decode(curl_multi_getcontent(worstAnswer)).answers[0]
+%>
