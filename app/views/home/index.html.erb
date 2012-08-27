@@ -31,4 +31,130 @@ window.onload = function() {
     #worstQuestion = json_decode(curl_multi_getcontent(worstQuestion)).questions[0]
     #top3Answers = json_decode(curl_multi_getcontent(top3Answers)).answers
     #worstAnswer = json_decode(curl_multi_getcontent(worstAnswer)).answers[0]
-%>
+
+@responses['users'].each do |user| %>
+  <li>
+  <div class="gray">
+  <h3><a href="http://stackoverflow.com/users/<% user.user_id %>"><%= user.display_name %></a> <span class="score right" title="reputation score"><%= user.reputation %></span></h3>
+  <span class="small">Last seen on Stack Overflow: <%= formatDate(user.last_access_date, false) %></span>
+  </div>
+  </li>
+<% end %>
+</ol>
+
+<h2>Latest reputation changes</h2>
+<div class="box">
+
+  <% if @responses['recentReputationChanges'].empty? %>
+    No reputation score changes yet!
+  <% end %>
+  <ol>
+  <% @responses['recentReputationChanges'].each do |change|
+    user_id = change.user_id
+    rep_change = change.positive_rep - change.negative_rep
+    %>
+    <li>
+      <%= rep_change > 0 ? "<span class='positive'>+rep_change</span>" : "<span class='negative'>rep_change</span>" %>
+      <strong><a href="http://stackoverflow.com/users/<%= users[user_id].user_id %>"><%= users[user_id].display_name %></a>
+      <%= change.post_type == "answer" ? "a:" : "q:" %></strong> <a class="bodytext"href="http://stackoverflow.com/questions/<%= change.post_id %>"><%= change.title %></a>
+
+      <span class="small"><%= formatDate(change.on_date) %></span>
+
+    </li>
+  <% end %>
+  </ol>
+
+</div>
+<div class="column left">
+
+  <h2>Top Questions</h2>
+  <div class="box">
+
+  <% if @responses.top3Questions.empty? %>
+    No questions yet!
+  <% end %>
+  <ol>
+  <% foreach (top3Questions as question) { %>
+    <li>
+      <div class="score number"><%= question.score %></div>
+      <p class="bodytext"><a href="http://stackoverflow.com/questions/<%= question.question_id %>">
+        <%= question.title %>
+      </a></p>
+      <strong class="left">- <a href="http://stackoverflow.com/users/<%= question.owner.user_id %>"><%= question.owner.display_name %></a></strong>
+      <span class="small right" style="text-align: right"><%= formatDate(question.creation_date) %><br /><%= implode(", ", question.tags) %></span>
+    </li>
+  <% } %>
+  </ol>
+  </div>
+
+  <h2>Worst Question</h2>
+  <div class="box">
+
+  <% if (worstQuestion.score >= 0) { %>
+    No questions currently have negative votes
+  <% } else { %>
+    <div class="score number"><%= worstQuestion.score %></div>
+    <p class="bodytext"><a href="http://stackoverflow.com/questions/<%= worstQuestion.question_id %> %>">
+      <%= worstQuestion.title %>
+    </a></p>
+      <strong class="left">- <a href="http://stackoverflow.com/users/<%= worstQuestion.owner.user_id %>"><%= worstQuestion.owner.display_name %></a></strong>
+    <span class="small right" style="text-align: right"><%= formatDate(worstQuestion.creation_date) %><br /><%= implode(", ", worstQuestion.tags) %></span>
+  <% } %>
+  </div>
+
+</div>
+
+<div class="column right">
+
+  <h2>Top Answers</h2>
+  <div class="box">
+
+  <% if (empty(top3Answers)) { %>
+    No answers yet!
+  <% } %>
+  <ol>
+  <% foreach (top3Answers as answer) { %>
+    <li>
+      <div class="score number"><%= answer.score %></div>
+      <p class="bodytext"><a href="http://stackoverflow.com/questions/<%= answer.question_id %>#<%= answer.answer_id %>">
+        <%= formatAnswerBody(answer.body) %>
+      </a></p>
+        <strong class="left">- <a href="http://stackoverflow.com/users/<%= answer.owner.user_id %>"><%= answer.owner.display_name %></a></strong>
+      <span class="small right"><%= formatDate(answer.creation_date) %></span>
+    </li>
+  <% } %>
+  </ol>
+  </div>
+
+  <h2>Worst Answer</h2>
+  <div class="box">
+
+  <% if (worstAnswer.score >= 0) { %>
+    No answers currently have negative votes
+  <% } else { %>
+    <div class="score number"><%= worstAnswer.score %></div>
+    <p class="bodytext"><a href="http://stackoverflow.com/questions/<%= worstAnswer.question_id %>#<%= worstAnswer.answer_id %>">
+      <%= formatAnswerBody(worstAnswer.body) %>
+    </a></p>
+      <strong class="left">- <a href="http://stackoverflow.com/users/<%= worstAnswer.owner.user_id %>"><%= worstAnswer.owner.display_name %></a></strong>
+    <span class="small right"><%= formatDate(worstAnswer.creation_date) %></span>
+  <% end %>
+  </div>
+
+</div>
+
+<% } %>
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || []
+  _gaq.push(['_setAccount', 'UA-25893301-1'])
+  _gaq.push(['_trackPageview'])
+
+  (function() {
+    var ga = document.createElement('script') ga.type = 'text/javascript' ga.async = true
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js'
+    var s = document.getElementsByTagName('script')[0] s.parentNode.insertBefore(ga, s)
+  })()
+
+</script>
