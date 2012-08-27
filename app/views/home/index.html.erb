@@ -17,6 +17,7 @@ window.onload = function() {
 	<p>It's not too late to join! Add your name to the <a href="https://docs.google.com/spreadsheet/ccc?key=0AtdiUzPLzgsidERKS0dIeGZtYlYxbHVHY0hDRWhxZkE#gid=0">Google Doc</a> and tell Golf.</p>
 </div>
 
+<div id="graph"><%= getGraph %></div>
 <div id="progressbar"></div>
 
 <p>Sep 28<span style="float: right">Oct 28</span></p>
@@ -70,7 +71,7 @@ window.onload = function() {
   <h2>Top Questions</h2>
   <div class="box">
 
-  <% if @responses.top3Questions.empty? %>
+  <% if @responses['top3Questions'].empty? %>
     No questions yet!
   <% end %>
   <ol>
@@ -90,16 +91,16 @@ window.onload = function() {
   <h2>Worst Question</h2>
   <div class="box">
 
-  <% if (worstQuestion.score >= 0) { %>
+  <% if worstQuestion.score >= 0 %>
     No questions currently have negative votes
-  <% } else { %>
+  <% else %>
     <div class="score number"><%= worstQuestion.score %></div>
     <p class="bodytext"><a href="http://stackoverflow.com/questions/<%= worstQuestion.question_id %> %>">
       <%= worstQuestion.title %>
     </a></p>
       <strong class="left">- <a href="http://stackoverflow.com/users/<%= worstQuestion.owner.user_id %>"><%= worstQuestion.owner.display_name %></a></strong>
     <span class="small right" style="text-align: right"><%= formatDate(worstQuestion.creation_date) %><br /><%= implode(", ", worstQuestion.tags) %></span>
-  <% } %>
+  <% end %>
   </div>
 
 </div>
@@ -109,11 +110,11 @@ window.onload = function() {
   <h2>Top Answers</h2>
   <div class="box">
 
-  <% if (empty(top3Answers)) { %>
+  <% if @responses['top3Answers'].empty? { %>
     No answers yet!
   <% } %>
   <ol>
-  <% foreach (top3Answers as answer) { %>
+  <% @responses['top3Answers'].each do |answer| %>
     <li>
       <div class="score number"><%= answer.score %></div>
       <p class="bodytext"><a href="http://stackoverflow.com/questions/<%= answer.question_id %>#<%= answer.answer_id %>">
@@ -122,16 +123,16 @@ window.onload = function() {
         <strong class="left">- <a href="http://stackoverflow.com/users/<%= answer.owner.user_id %>"><%= answer.owner.display_name %></a></strong>
       <span class="small right"><%= formatDate(answer.creation_date) %></span>
     </li>
-  <% } %>
+  <% end %>
   </ol>
   </div>
 
   <h2>Worst Answer</h2>
   <div class="box">
 
-  <% if (worstAnswer.score >= 0) { %>
+  <% if worstAnswer.score >= 0 %>
     No answers currently have negative votes
-  <% } else { %>
+  <% else %>
     <div class="score number"><%= worstAnswer.score %></div>
     <p class="bodytext"><a href="http://stackoverflow.com/questions/<%= worstAnswer.question_id %>#<%= worstAnswer.answer_id %>">
       <%= formatAnswerBody(worstAnswer.body) %>
@@ -143,7 +144,7 @@ window.onload = function() {
 
 </div>
 
-<% } %>
+<% end %>
 
 <script type="text/javascript">
 

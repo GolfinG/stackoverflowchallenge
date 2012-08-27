@@ -1,21 +1,27 @@
 require 'curb'
 require 'json'
+require 'google_chart'
 
 class HomeController < ApplicationController
 
   def index
     @contestants = [
-      {:id => '955404', :team => 0, :full_name => 'Golf Sinteppadon', :company => 'TwitchTV', :startingReputation => 259},
-      {:id => '959577', :team => 0, :full_name => 'James Vaughan', :company => 'SAY Media', :startingReputation => 16},
-      {:id => '379289', :team => 1, :full_name => 'Tim Vega', :company => 'Tableau Software', :startingReputation => 1},
-      {:id => '1382614', :team => 1, :full_name => 'Cosmo Smith', :company => 'Rover', :startingReputation => 46},
-      {:id => '906800', :team => 1, :full_name => 'Ji Mun', :company => 'Wetpaint', :startingReputation => 60},
-      {:id => '1586409', :team => 0, :full_name => 'Eui Min Jung', :company => 'Intentional Software', :startingReputation => 1},
-      {:id => '1586476', :team => 0, :full_name => 'DJ Sprouse', :company => 'ComputeNext', :startingReputation => 1},
-      {:id => '781529', :team => 1, :full_name => 'Min Sul', :company => 'Amazon', :startingReputation => 372},
-      {:id => '303052', :team => 0, :full_name => 'James Athappilly', :company => 'Facebook', :startingReputation => 292},
-      {:id => '1829', :team => 1, :full_name => 'Jennifer Yang', :company => 'Salesforce', :startingReputation => 1}
+      {:id => '955404', :team => 0, :company => 'TwitchTV', :startingReputation => 259}, # Golf
+      {:id => '959577', :team => 0, :company => 'SAY Media', :startingReputation => 16}, # James V
+      {:id => '379289', :team => 1, :company => 'Tableau Software', :startingReputation => 1}, # Tim
+      {:id => '1382614', :team => 1, :company => 'Rover', :startingReputation => 46}, # Cosmo
+      {:id => '906800', :team => 1, :company => 'Wetpaint', :startingReputation => 60}, # Ji
+      {:id => '1586409', :team => 0, :company => 'Intentional Software', :startingReputation => 1}, # Eui
+      {:id => '1586476', :team => 0, :company => 'ComputeNext', :startingReputation => 1}, # DJ
+      {:id => '781529', :team => 1, :company => 'Amazon', :startingReputation => 372}, # Min
+      {:id => '303052', :team => 0, :company => 'Facebook', :startingReputation => 292}, # James A
+      # {:id => '1829', :team => 1, :company => 'Salesforce', :startingReputation => 1}, # Jennifer Yang
+      {:id => '1610174', :team => 1, :company => 'UW', :startingReputation => 1}, # Jim
+      {:id => '1533702', :team => 0, :company => 'Google', :startingReputation => 71}, # Sterling
+      {:id => '1056955', :team => 1, :company => 'Amazon', :startingReputation => 11}, # Siwei
+      {:id => '1611124', :team => 0, :company => 'Marin Software', :startingReputation => 1} # Jayson
     ]
+
     @responses = {}
     @from_date = 1345420800 # Timestamp on August 20
     requests = [
@@ -41,11 +47,12 @@ class HomeController < ApplicationController
       m.add(c)
     end
 
-    m.perform
+    #m.perform
 
     @responses.each do |key,value|
-      value = JSON.parse value
+      #value = JSON.parse value
     end
+
   end
 
   ##
