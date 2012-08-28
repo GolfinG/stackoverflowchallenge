@@ -1,12 +1,3 @@
-<script>
-window.onload = function() {
-	(function() {
-		("#progressbar").progressbar({
-			value: <%= days_from_beginning %> / 40 * 100
-		})
-	})
-}
-</script>
 <h1><img src="022stackoverflowchallenge.png" alt="022 Stack Overflow Challenge" /></h1>
 
 <div id="description">
@@ -18,7 +9,7 @@ window.onload = function() {
 </div>
 
 <div id="graph"></div>
-<div id="progressbar"></div>
+<div id="progressbar" data-percentage="<%= days_from_beginning / 40 * 100 %>"></div>
 
 <p>Sep 28<span style="float: right">Oct 28</span></p>
 
@@ -54,7 +45,7 @@ window.onload = function() {
       <strong><a href="http://stackoverflow.com/users/<%= user_id %>"><%= users[user_id]['display_name'] %></a>
       <%= change['post_type'] == "answer" ? "a:" : "q:" %></strong> <a class="bodytext"href="http://stackoverflow.com/questions/<%= change['post_id'] %>"><%= change['title'] %></a>
 
-      <span class="small"><%= formatDate(change['on_date']) %></span>
+      <span class="small"><%= format_date(change['on_date']) %></span>
 
     </li>
   <% end %>
@@ -66,37 +57,23 @@ window.onload = function() {
 
   <h2>Top Questions</h2>
   <div class="box">
-
   <% if @data['top3Questions'].empty? %>
     No questions yet!
   <% end %>
-  <ol>
-  <% @data['top3Questions'].each do |question| %>
-    <li>
-      <div class="score number"><%= question.score %></div>
-      <p class="bodytext"><a href="http://stackoverflow.com/questions/<%= question.question_id %>">
-        <%= question.title %>
-      </a></p>
-      <strong class="left">- <a href="http://stackoverflow.com/users/<%= question.owner.user_id %>"><%= question.owner.display_name %></a></strong>
-      <span class="small right" style="text-align: right"><%= formatDate(question.creation_date) %><br /><%= implode(", ", question.tags) %></span>
-    </li>
-  <% end %>
-  </ol>
+    <ol>
+    <% @data['top3Questions'].each do |question| %>
+      <li><%= get_question_html question %></li>
+    <% end %>
+    </ol>
   </div>
 
   <h2>Worst Question</h2>
   <div class="box">
-
-  <% if @data['worstQuestion']['score'] and @data['worstQuestion']['score'] >= 0 %>
-    No questions currently have negative votes
-  <% else %>
-    <div class="score number"><%= worstQuestion.score %></div>
-    <p class="bodytext"><a href="http://stackoverflow.com/questions/<%= worstQuestion.question_id %> %>">
-      <%= worstQuestion.title %>
-    </a></p>
-      <strong class="left">- <a href="http://stackoverflow.com/users/<%= worstQuestion.owner.user_id %>"><%= worstQuestion.owner.display_name %></a></strong>
-    <span class="small right" style="text-align: right"><%= formatDate(worstQuestion.creation_date) %><br /><%= implode(", ", worstQuestion.tags) %></span>
-  <% end %>
+    <% if @data['worstQuestion'][0]['score'] >= 0 %>
+      No questions currently have negative votes
+    <% else %>
+      <%= @data['worstQuestion'][0] %>
+    <% end %>
   </div>
 
 </div>
@@ -110,31 +87,19 @@ window.onload = function() {
     No answers yet!
   <% end %>
   <ol>
-  <% @data['top3Answers'].each do |answer| %>
-    <li>
-      <div class="score number"><%= answer.score %></div>
-      <p class="bodytext"><a href="http://stackoverflow.com/questions/<%= answer.question_id %>#<%= answer.answer_id %>">
-        <%= formatAnswerBody(answer.body) %>
-      </a></p>
-        <strong class="left">- <a href="http://stackoverflow.com/users/<%= answer.owner.user_id %>"><%= answer.owner.display_name %></a></strong>
-      <span class="small right"><%= formatDate(answer.creation_date) %></span>
-    </li>
-  <% end %>
+    <% @data['top3Answers'].each do |answer| %>
+      <li><%= get_answer_html answer %></li>
+    <% end %>
   </ol>
   </div>
 
   <h2>Worst Answer</h2>
   <div class="box">
 
-  <% if worstAnswer.score >= 0 %>
+  <% if @data['worstAnswer'][0]['score'] >= 0 %>
     No answers currently have negative votes
   <% else %>
-    <div class="score number"><%= worstAnswer.score %></div>
-    <p class="bodytext"><a href="http://stackoverflow.com/questions/<%= worstAnswer.question_id %>#<%= worstAnswer.answer_id %>">
-      <%= formatAnswerBody(worstAnswer.body) %>
-    </a></p>
-      <strong class="left">- <a href="http://stackoverflow.com/users/<%= worstAnswer.owner.user_id %>"><%= worstAnswer.owner.display_name %></a></strong>
-    <span class="small right"><%= formatDate(worstAnswer.creation_date) %></span>
+    <%= get_answer_html @data['worstAnswer'][0] %>
   <% end %>
   </div>
 

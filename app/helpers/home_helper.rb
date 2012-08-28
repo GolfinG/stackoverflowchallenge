@@ -17,7 +17,7 @@ module HomeHelper
   ##
   # Take a block of HTML, remove tags, and limit length to maxLength chars
   # @param answer
-  def formatAnswerBody(answer)
+  def format_answer_body(answer)
     maxLength = 150
     answer = strip_tags(answer)
     if (strlen(answer) > maxLength)
@@ -26,4 +26,27 @@ module HomeHelper
     return answer
   end
 
+  def get_question_html(question)
+    return %Q(
+      <div class="score number">#{question['score']}</div>
+      <p class="bodytext">
+        <a href="http://stackoverflow.com/questions/#{question['question_id']}">
+          #{question['title']}
+        </a>
+      </p>
+      <strong class="left">- <a href="http://stackoverflow.com/users/#{question['owner']['user_id']}">#{question['owner']['display_name']}</a></strong>
+      <span class="small right" style="text-align: right">#{format_date(question['creation_date'])}<br />#{implode(", ", question['tags'])}</span>
+    )
+  end
+
+  def get_answer_html(answer)
+    return %Q(
+    <div class="score number">#{answer['score']}</div>
+      <p class="bodytext"><a href="http://stackoverflow.com/questions/#{answer['question_id']}##{answer['answer_id']}">
+        #{format_answer_body(answer['body'])}
+      </a></p>
+        <strong class="left">- <a href="http://stackoverflow.com/users/#{answer['owner']['user_id']}">#{answer['owner']['display_name']}</a></strong>
+      <span class="small right">#{format_date(answer['creation_date'])}</span>
+    )
+  end
 end

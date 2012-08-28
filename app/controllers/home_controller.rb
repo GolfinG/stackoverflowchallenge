@@ -24,12 +24,12 @@ class HomeController < ApplicationController
     @data = {}
     @from_date = 1345420800 # Timestamp on August 20
     requests = [
-      {:name => 'users', :endpoint => '', :params => {}},
-      {:name => 'recentReputationChanges', :endpoint => 'reputation', :params => {:pagesize => 10, :fromdate => @from_date}},
-      {:name => 'top3Questions', :endpoint => 'questions', :params => {:pagesize => 3, :sort => "votes", :fromdate => @from_date}},
-      {:name => 'worstQuestion', :endpoint => 'questions', :params => {:body => "true", :pagesize => 1, :sort => "votes", :fromdate => @from_date, :order => "asc"}},
-      {:name => 'top3Answers', :endpoint => 'answers', :params => {:body => 'true', :pagesize => 3, :sort => "votes", :fromdate => @from_date}},
-      {:name => 'worstAnswer', :endpoint => 'answers', :params => {:body => "true", :pagesize => 1, :sort => "votes", :fromdate => @from_date, :order => "asc"}}
+      {:name => 'users', :endpoint => '', :field_name => 'items', :params => {}},
+      {:name => 'recentReputationChanges', :endpoint => 'reputation', :field_name => 'rep_changes',  :params => {:pagesize => 10, :fromdate => @from_date}},
+      {:name => 'top3Questions', :endpoint => 'questions', :field_name => 'questions',  :params => {:pagesize => 3, :sort => "votes", :fromdate => @from_date}},
+      {:name => 'worstQuestion', :endpoint => 'questions', :field_name => 'questions',  :params => {:body => "true", :pagesize => 1, :sort => "votes", :fromdate => @from_date, :order => "asc"}},
+      {:name => 'top3Answers', :endpoint => 'answers', :field_name => 'answers',  :params => {:body => 'true', :pagesize => 3, :sort => "votes", :fromdate => @from_date}},
+      {:name => 'worstAnswer', :endpoint => 'answers', :field_name => 'answers',  :params => {:body => "true", :pagesize => 1, :sort => "votes", :fromdate => @from_date, :order => "asc"}}
     ]
 
     m = Curl::Multi.new
@@ -49,14 +49,9 @@ class HomeController < ApplicationController
 
     m.perform
 
-    @data['users'] = format_users(@data['users']['items'])
-    @data['recentReputationChanges'] = @data['recentReputationChanges']['rep_changes']
-    #recentReputationChanges = json_decode(curl_multi_getcontent(recentReputationChanges)).rep_changes
-    #top3Questions = json_decode(curl_multi_getcontent(top3Questions)).questions
-    #worstQuestion = json_decode(curl_multi_getcontent(worstQuestion)).questions[0]
-    #top3Answers = json_decode(curl_multi_getcontent(top3Answers)).answers
-    #worstAnswer = json_decode(curl_multi_getcontent(worstAnswer)).answers[0]
-
+    @data['users'] = format_users(@data['users'])
+    @data['worstQuestion'] = @data['worstQuestion']['questions'][0]
+    @data['worstAnswer'] = @data['worstAnswer']['answers'][0]
   end
 
   ##
@@ -96,7 +91,7 @@ class HomeController < ApplicationController
     return ids.join(';')
   end
 
-  def saveDayScore
+  def save_day_score
     c = Curl::Easy.new(endpoint) do |curl|
       curl.follow_location = true
       curl.encoding = "gzip"
